@@ -1,0 +1,1094 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vladas Phrasenkarten</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one centred column (max 680px). Lesson chips on top, one flip card as the hero, two answer buttons; a Practice tab with eight exercises; settings and progress code at the bottom. Palette: blush pink. */
+/* Palette: soft blush #F7C5BC as the brand colour, warm rose-brown ink. */
+:root{
+  --bg:#FFF5F2; --surface:#FFFBFA; --surface-2:#FBE5DF; --ink:#3B2623; --muted:#86645E; --line:#F0D2CB;
+  --brown:#D98F82; --brown-soft:#F7C5BC; --brown-ink:#7A3128;
+  --latte:#C9A59E; --latte-soft:#FCE9E4; --latte-ink:#6B4039;
+  --good:#44764F; --good-soft:#DCEBDF; --bad:#B3261E; --bad-soft:#F9D6D1;
+  --shadow:0 1px 0 rgba(59,38,35,.05),0 12px 30px -14px rgba(59,38,35,.3);
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#231918; --surface:#2E2120; --surface-2:#3B2A28; --ink:#F8E7E3; --muted:#C4A7A1; --line:#4A3633;
+  --brown:#F7C5BC; --brown-soft:#4E2F2B; --brown-ink:#F7C5BC;
+  --latte:#D9A99F; --latte-soft:#3F2B28; --latte-ink:#F0C9C1;
+  --good:#93C79F; --good-soft:#243728; --bad:#F0A49B; --bad-soft:#4C2927;
+  --shadow:0 1px 0 rgba(0,0,0,.25),0 14px 30px -14px rgba(0,0,0,.65); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#231918; --surface:#2E2120; --surface-2:#3B2A28; --ink:#F8E7E3; --muted:#C4A7A1; --line:#4A3633;
+  --brown:#F7C5BC; --brown-soft:#4E2F2B; --brown-ink:#F7C5BC;
+  --latte:#D9A99F; --latte-soft:#3F2B28; --latte-ink:#F0C9C1;
+  --good:#93C79F; --good-soft:#243728; --bad:#F0A49B; --bad-soft:#4C2927;
+  --shadow:0 1px 0 rgba(0,0,0,.25),0 14px 30px -14px rgba(0,0,0,.65); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brown);outline-offset:2px}
+
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,7vw,40px);line-height:1.05;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--brown-ink)}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;background:var(--surface-2);font-variant-numeric:tabular-nums}
+.chip.k{background:var(--good-soft);color:var(--good)}
+.chip.r{background:var(--brown-soft);color:var(--brown-ink)}
+
+.tabs{display:flex;gap:4px;padding:4px;background:var(--surface-2);border-radius:14px}
+.tab{flex:1;border:0;background:transparent;padding:10px 12px;border-radius:10px;font-weight:700;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+.lessons{display:flex;flex-direction:column;gap:8px}
+.lesson-row{display:flex;flex-wrap:wrap;gap:6px}
+.lchip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px;color:var(--muted);display:inline-flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums}
+.lchip small{font-weight:600;opacity:.75}
+.lchip[aria-pressed="true"]{border-color:var(--brown);background:var(--brown-soft);color:var(--brown-ink)}
+.lchip.all[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toggle{border:1px solid var(--line);background:var(--surface);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}
+.toggle[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+select{border:1px solid var(--line);background:var(--surface);padding:7px 10px;border-radius:999px;font-size:13px;font-weight:600;max-width:100%}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+
+.progress{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--brown);border-radius:99px;transition:width .3s}
+.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:12px;padding:0}
+
+.scene{perspective:1400px}
+.card{position:relative;display:grid;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,.7,.2,1);cursor:pointer;min-height:310px}
+.card.flipped{transform:rotateY(180deg)}
+.card.instant{transition:none}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.back{transform:rotateY(180deg)}
+.card:not(.flipped) .back,.card.flipped .front{pointer-events:none}
+.face-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lang{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.tag{font-size:11px;font-weight:700;color:var(--latte-ink);background:var(--latte-soft);border-radius:999px;padding:2px 8px;margin-left:6px;letter-spacing:.04em;text-transform:none}
+.front .main{flex:1;display:flex;align-items:center;justify-content:center;text-align:center}
+.phrase{font-family:var(--display);font-weight:700;font-size:clamp(26px,6.4vw,40px);line-height:1.12;text-wrap:balance;margin:0;overflow-wrap:anywhere}
+.hint{font-size:12px;color:var(--muted);text-align:center}
+.say{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--latte-soft);color:var(--latte-ink);display:grid;place-items:center}
+.say svg{width:20px;height:20px}
+.say:active{transform:scale(.94)}
+.dict{font-size:12px;font-weight:700;color:var(--latte-ink);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.dict:hover{background:var(--latte-soft)}
+
+.back-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.back-head .t{min-width:0}
+.back-head .side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.big{font-family:var(--display);font-weight:700;font-size:clamp(22px,5.4vw,30px);line-height:1.15;margin:0;text-wrap:balance;overflow-wrap:anywhere}
+.small{color:var(--muted);font-weight:600;font-size:14px;margin:2px 0 0}
+.block{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:12px}
+.label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.ex{margin:0;font-size:16px}
+.gap{border:0;border-bottom:2px dotted var(--brown);background:var(--brown-soft);color:var(--brown-ink);font-weight:700;padding:0 6px;border-radius:6px 6px 0 0;min-width:3.5em}
+.gap.open{border-bottom-style:solid;background:var(--good-soft);color:var(--good);border-bottom-color:var(--good)}
+.gap-in{border:0;border-bottom:2px dotted var(--brown);background:var(--brown-soft);color:var(--brown-ink);font-weight:700;padding:0 6px;border-radius:6px 6px 0 0;max-width:100%;font-size:inherit}
+.gap-in.good{border-bottom-style:solid;border-bottom-color:var(--good);background:var(--good-soft);color:var(--good)}
+.gap-in.wrong{border-bottom-style:solid;border-bottom-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.gap-fb{margin:0;font-size:13px;font-weight:600;min-height:1.2em}
+.gap-fb.good{color:var(--good)} .gap-fb.wrong{color:var(--bad)}
+.cols{display:flex;flex-wrap:wrap;gap:6px}
+.col{background:var(--surface-2);padding:4px 10px;border-radius:8px;font-size:13.5px;font-weight:600}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:1.5px solid transparent;border-radius:14px;padding:13px 14px;font-weight:700;font-size:15px}
+.btn-r{background:var(--brown-soft);color:var(--brown-ink);border-color:var(--brown)}
+.btn-k{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.btn-plain{background:var(--surface);border-color:var(--line)}
+.btn-dark{background:var(--ink);color:var(--bg)}
+.btn-sm{padding:8px 12px;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:default}
+.keys{font-size:12px;color:var(--muted);text-align:center;margin:0}
+.keys kbd{font-family:var(--body);background:var(--surface-2);border-radius:4px;padding:0 5px;font-size:11px}
+.stack{display:flex;flex-direction:column;gap:14px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:14px}
+.panel h2{font-family:var(--display);font-size:24px;margin:0;line-height:1.15}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list b{font-weight:700}
+.list span{color:var(--muted);text-align:right}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.muted{color:var(--muted);margin:0}
+
+.ex-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ex-tab{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 6px;font-weight:700;font-size:13px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.ex-tab small{font-weight:500;font-size:11px}
+.ex-tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+@media (max-width:480px){.ex-tabs{grid-template-columns:1fr 1fr}}
+
+.fx-sent{display:flex;flex-wrap:wrap;gap:6px;font-size:18px}
+.fx-part{border:1.5px dashed var(--line);background:var(--surface);border-radius:10px;padding:6px 10px;font-weight:600;text-align:left}
+.fx-part:hover{border-color:var(--brown)}
+.fx-part.miss{border-style:solid;border-color:var(--line);opacity:.55;animation:shake .35s}
+.fx-part.hintp{border-style:solid;border-color:var(--brown);background:var(--brown-soft)}
+.fx-part.found{border-style:solid;border-color:var(--bad);background:var(--bad-soft);color:var(--bad);text-decoration:line-through}
+.fx-part.fixed{text-decoration:none;border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.fx-step{display:flex;flex-direction:column;gap:8px}
+.sit-box{background:var(--surface-2);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.sit-text{font-family:var(--display);font-weight:700;font-size:clamp(19px,4.6vw,23px);line-height:1.3;margin:0;text-wrap:pretty}
+.sit-uk{font-size:14px;color:var(--muted);margin:0}
+.fork{display:flex;flex-direction:column;align-items:center;gap:14px}
+.fork-key{font-family:var(--display);font-weight:700;font-size:clamp(24px,6vw,34px);background:var(--ink);color:var(--bg);border-radius:16px;padding:8px 20px;text-align:center;overflow-wrap:anywhere}
+.fork-opts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.fopt{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;font-weight:700}
+.fopt[aria-pressed="true"]{border-color:var(--brown);background:var(--brown-soft);color:var(--brown-ink)}
+.fopt.good{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.fopt.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad);text-decoration:line-through}
+.fopt.missed{border-color:var(--good);border-style:dashed;color:var(--good)}
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;padding:10px;border:1.5px dashed var(--line);border-radius:14px}
+.schip{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;font-weight:600;font-size:14px;text-align:left}
+.schip.sel{border-color:var(--brown);background:var(--brown-soft);color:var(--brown-ink)}
+.schip.good{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.schip.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.schip small{display:block;font-weight:600;font-size:11px}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bin{border:1.5px solid var(--line);background:var(--surface-2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:90px;text-align:left;cursor:pointer;min-width:0}
+.bin.armed{border-color:var(--brown);background:var(--brown-soft)}
+.bin-name{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.bin-items{display:flex;flex-wrap:wrap;gap:6px}
+
+.match{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.match .colm{display:flex;flex-direction:column;gap:8px;min-width:0}
+.m{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px;text-align:left;font-weight:600;min-height:48px;overflow-wrap:anywhere}
+.m.sel{border-color:var(--brown);background:var(--brown-soft)}
+.m.ok{border-color:var(--good);background:var(--good-soft);color:var(--good);opacity:.7;cursor:default}
+.m.no{border-color:var(--bad);background:var(--bad-soft);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion: reduce){.card{transition:none}.fx-part.miss,.m.no{animation:none}}
+
+.q-meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.q-sent{font-size:18px;line-height:1.9;margin:0}
+.q-sent input,.typed{border:0;border-bottom:2px solid var(--brown);background:var(--brown-soft);border-radius:6px 6px 0 0;padding:2px 6px;font-weight:700;color:var(--brown-ink);max-width:100%}
+.typed{width:100%;font-size:18px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink)}
+.q-sent input.good,.typed.good{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.q-sent input.wrong,.typed.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.fb{margin:0;font-weight:600;min-height:1.5em}
+.fb.good{color:var(--good)} .fb.wrong{color:var(--bad)}
+.opts{display:grid;gap:8px}
+.opt{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;text-align:left;font-weight:600;overflow-wrap:anywhere}
+.opt.good{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.q-phrase{display:flex;align-items:center;gap:12px}
+.q-phrase .big{flex:1;min-width:0}
+.play{display:flex;gap:10px;flex-wrap:wrap}
+.score{font-family:var(--display);font-size:52px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.score small{font-size:22px;color:var(--muted)}
+
+details.settings{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:6px 22px}
+details.settings summary{cursor:pointer;font-weight:700;padding:14px 0;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.settings summary::-webkit-details-marker{display:none}
+details.settings summary::after{content:"+";font-size:20px;color:var(--muted)}
+details.settings[open] summary::after{content:"–"}
+.set-body{display:flex;flex-direction:column;gap:18px;padding-bottom:18px}
+.set-block{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:14px}
+textarea{width:100%;min-height:72px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);padding:8px 10px;font-size:12px;resize:vertical}
+.btn-danger{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Німецька</div>
+    <h1>Vladas <em>Phrasenkarten</em></h1>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabCards" role="tab" aria-selected="true" type="button">Картки</button>
+    <button class="tab" id="tabEx" role="tab" aria-selected="false" type="button">Вправи</button>
+  </div>
+
+  <section class="lessons" aria-label="Уроки">
+    <div class="label">Уроки</div>
+    <div class="lesson-row" id="lessons"></div>
+  </section>
+
+  <main id="viewCards" class="stack">
+    <div class="controls">
+      <label class="sr" for="mode">Режим</label>
+      <select id="mode">
+        <option value="today">На сьогодні</option>
+        <option value="all">Усі картки</option>
+        <option value="rep">Тільки повторити</option>
+        <option value="new">Тільки нові</option>
+      </select>
+      <button class="toggle" id="rand" type="button" aria-pressed="false">Випадково</button>
+      <button class="toggle" id="rev" type="button" aria-pressed="false">UA → DE</button>
+    </div>
+    <p class="note" id="modeNote"></p>
+    <div id="cardArea" class="stack"></div>
+  </main>
+
+  <main id="viewEx" class="stack" hidden>
+    <div class="ex-tabs" id="exTabs" role="tablist"></div>
+    <div class="controls">
+      <span class="label">Фрази для вправ</span>
+      <button class="toggle" id="srcAll" type="button" aria-pressed="true">Усі фрази</button>
+      <button class="toggle" id="srcRep" type="button" aria-pressed="false">Тільки повторити</button>
+    </div>
+    <div id="exArea" class="stack"></div>
+  </main>
+
+  <details class="settings" id="settings">
+    <summary>Налаштування й прогрес</summary>
+    <div class="set-body">
+      <div class="set-block">
+        <div class="label">Голос озвучки</div>
+        <div class="row">
+          <label class="sr" for="voice">Голос</label>
+          <select id="voice"></select>
+          <button class="btn btn-plain btn-sm" id="voiceTest" type="button">Прослухати</button>
+        </div>
+        <p class="note">Голоси зі ★ звучать природніше. На iPhone: Налаштування → Універсальний доступ → Spoken Content → Voices → German, і завантаж голос Enhanced або Premium.</p>
+      </div>
+      <div class="set-block">
+        <div class="label">Перенесення прогресу</div>
+        <div class="row">
+          <button class="btn btn-plain btn-sm" id="copyCode" type="button">Скопіювати код прогресу</button>
+        </div>
+        <label class="sr" for="codeOut">Код прогресу</label>
+        <textarea id="codeOut" readonly hidden></textarea>
+        <label class="label" for="codeIn">Відновити з коду</label>
+        <textarea id="codeIn" placeholder="Встав сюди код прогресу"></textarea>
+        <div class="row"><button class="btn btn-plain btn-sm" id="restore" type="button">Відновити</button></div>
+        <p class="note" id="codeMsg" role="status"></p>
+      </div>
+      <div class="set-block">
+        <div class="label">Порада</div>
+        <p class="note">Відкривай цю сторінку завжди в одному браузері (Safari або Chrome), а не всередині Telegram чи Instagram. Інакше прогрес збережеться окремо в кожному місці.</p>
+      </div>
+      <div class="set-block">
+        <div class="label">Скидання</div>
+        <div class="row"><button class="btn btn-danger btn-sm" id="reset" type="button">Скинути весь прогрес</button></div>
+      </div>
+    </div>
+  </details>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== ДАНІ (легко доповнювати) ===================== */
+var L1="Veränderungen";
+
+// kind: D дія, R іменник, O опис, Z зв’язки й підсилювачі, F ціла фраза; S/P/U/I для слів-зв’язок
+var CARDS=[
+ {lesson:L1,de:"der Betrieb",uk:"підприємство, фірма",ex:"Mein Vater arbeitet in einem kleinen ___.",ans:"Betrieb",col:["in einem Betrieb arbeiten","ein großer Betrieb","der Betrieb schließt"],dict:"Betrieb",kind:"R"},
+ {lesson:L1,de:"etwas von Hand machen",uk:"робити щось вручну",ex:"Die Brötchen werden hier noch von ___ gemacht.",ans:"Hand",col:["von Hand waschen","von Hand schreiben","von Hand genäht"],dict:"Hand",kind:"D"},
+ {lesson:L1,de:"die Ausbildung",uk:"професійне навчання, фахова освіта",ex:"Nach der Schule mache ich eine ___ als Krankenpfleger.",ans:"Ausbildung",col:["eine Ausbildung machen","eine Ausbildung beginnen","eine Ausbildung abschließen"],dict:"Ausbildung",kind:"R"},
+ {lesson:L1,de:"als Pflegekraft arbeiten",uk:"працювати доглядальником або медпрацівником",ex:"Meine Tante arbeitet als ___ in einem Krankenhaus.",ans:"Pflegekraft",col:["als Pflegekraft im Krankenhaus arbeiten","eine Pflegekraft suchen","eine ausgebildete Pflegekraft"],dict:"Pflegekraft",kind:"F"},
+ {lesson:L1,de:"heilen",uk:"лікувати, зціляти; гоїтися (про рану)",ex:"Die Ärztin kann viele Krankheiten ___.",ans:"heilen",col:["eine Krankheit heilen","Kranke heilen","eine Wunde heilt"],dict:"heilen",kind:"D"},
+ {lesson:L1,de:"die Behandlung",uk:"лікування",ex:"Die ___ im Krankenhaus dauert zwei Wochen.",ans:"Behandlung",col:["eine Behandlung bekommen","in Behandlung sein","die Behandlung dauert"],dict:"Behandlung",kind:"R"},
+ {lesson:L1,de:"entstehen",uk:"виникати, з’являтися",ex:"In der Stadt ___ viele neue Arbeitsplätze.",ans:"entstehen",col:["neue Berufe entstehen","ein Problem entsteht","aus einer Idee entstehen"],dict:"entstehen",kind:"D"},
+ {lesson:L1,de:"streng sein",uk:"бути суворим",ex:"Mein Chef ist sehr ___, aber gerecht.",ans:"streng",col:["ein strenger Chef","streng zu den Kindern sein","strenge Regeln"],dict:"streng",kind:"O"},
+ {lesson:L1,de:"im Vergleich zu / im Gegensatz zu",uk:"порівняно з / на відміну від",ex:"___ zu früher gibt es heute mehr Maschinen.",ans:"Im Vergleich",col:["im Vergleich zu früher","im Gegensatz zu früher","im Gegensatz zu meinem Bruder"],dict:"Vergleich",kind:"Z",say:"im Vergleich zu, im Gegensatz zu"},
+ {lesson:L1,de:"schwierig",uk:"складний, важкий",ex:"Die Arbeit in der Pflege ist manchmal ___.",ans:"schwierig",col:["eine schwierige Aufgabe","ein schwieriger Beruf","schwierig zu verstehen"],dict:"schwierig",kind:"O"},
+ {lesson:L1,de:"schlecht",uk:"поганий, погано",ex:"Der Job ist leider ___ bezahlt.",ans:"schlecht",col:["schlecht bezahlt","schlecht schlafen","schlechte Laune haben"],dict:"schlecht",kind:"O"},
+ {lesson:L1,de:"der Grund ist, dass",uk:"причина в тому, що",ex:"Der ___ ist, dass es zu wenig Pflegekräfte gibt.",ans:"Grund",col:["der Grund dafür","aus diesem Grund","ohne Grund"],dict:"Grund",kind:"Z"},
+ {lesson:L1,de:"das Gehalt",uk:"зарплата (щомісячна, у службовців)",ex:"Mein ___ kommt immer am Monatsende.",ans:"Gehalt",col:["ein gutes Gehalt","das Gehalt bekommen","das Gehalt erhöhen"],dict:"Gehalt",kind:"R"},
+ {lesson:L1,de:"der Lohn",uk:"заробіток (погодинний чи тижневий, у робітників)",ex:"Der ___ ist in diesem Betrieb zu niedrig.",ans:"Lohn",col:["ein niedriger Lohn","der Lohn steigt","den Lohn bekommen"],dict:"Lohn",kind:"R"},
+ {lesson:L1,de:"froh",uk:"радий, веселий",ex:"Ich bin ___, dass ich eine neue Arbeit gefunden habe.",ans:"froh",col:["froh sein","froh über die Nachricht sein","froh sein, dass …"],dict:"froh",kind:"O"},
+ {lesson:L1,de:"laut",uk:"гучний, шумний; гучно",ex:"In der Fabrik ist es sehr ___.",ans:"laut",col:["laute Maschinen","laut sprechen","zu laut sein"],dict:"laut",kind:"O"},
+ {lesson:L1,de:"häufig",uk:"частий; часто",ex:"Pflegekräfte arbeiten ___ am Wochenende.",ans:"häufig",col:["sehr häufig","ein häufiger Fehler","häufig vorkommen"],dict:"häufig",kind:"O"},
+ {lesson:L1,de:"gefährlich",uk:"небезпечний",ex:"Die Arbeit auf der Baustelle ist ___.",ans:"gefährlich",col:["ein gefährlicher Beruf","für die Gesundheit gefährlich sein","gefährlich werden"],dict:"gefährlich",kind:"O"},
+ {lesson:L1,de:"traurig",uk:"сумний",ex:"Ich bin ___, weil mein Kollege den Betrieb verlässt.",ans:"traurig",col:["traurig sein","traurig über etwas sein","ein trauriger Tag"],dict:"traurig",kind:"O"},
+ {lesson:L1,de:"erledigen",uk:"виконувати, залагоджувати (справи)",ex:"Ich muss noch ein paar Aufgaben ___.",ans:"erledigen",col:["Aufgaben erledigen","Einkäufe erledigen","die Arbeit erledigen"],dict:"erledigen",kind:"D"}
+];
+
+// готові «виделки»: word — ключове слово, ok — що поєднується, bad — зайве
+var FORKS=[
+ {lesson:L1,word:"die Ausbildung",ok:["machen","beginnen","abschließen"],bad:["heilen"],why:"Ausbildung: machen, beginnen, abschließen. Heilen вживається про хвороби й рани."},
+ {lesson:L1,word:"das Gehalt",ok:["bekommen","erhöhen","ein gutes"],bad:["entstehen"],why:"Gehalt: bekommen, erhöhen, ein gutes Gehalt. Entstehen значить «виникати» і до зарплати не стосується."},
+ {lesson:L1,word:"die Behandlung",ok:["bekommen","eine neue","dauert lange"],bad:["erledigen"],why:"Behandlung: bekommen, eine neue Behandlung, dauert lange. Erledigen вживається про справи й завдання."},
+ {lesson:L1,word:"erledigen",ok:["Aufgaben","Einkäufe","Hausaufgaben"],bad:["Krankheiten"],why:"Erledigen: справи, завдання, покупки. Хвороби лікують: Krankheiten heilen."}
+];
+
+// по одному реченню з однією помилкою на кожну фразу
+var FIXES=[
+ {lesson:L1,de:"der Betrieb",parts:["Mein Vater","arbeitet","in einen","kleinen Betrieb."],bad:2,fix:["in einem"],why:"Питання «де?» вимагає Dativ: in einem Betrieb (der Betrieb)."},
+ {lesson:L1,de:"etwas von Hand machen",parts:["Die Brötchen","werden","mit Hand","gemacht."],bad:2,fix:["von Hand"],why:"Сталий вираз: von Hand, а не «mit Hand»."},
+ {lesson:L1,de:"die Ausbildung",parts:["Ich","mache","ein Ausbildung","als Koch."],bad:2,fix:["eine Ausbildung"],why:"Ausbildung жіночого роду: eine Ausbildung."},
+ {lesson:L1,de:"als Pflegekraft arbeiten",parts:["Meine Tante","arbeitet","wie Pflegekraft","im Krankenhaus."],bad:2,fix:["als Pflegekraft"],why:"Про професію кажемо arbeiten als, а не wie. Артикля немає."},
+ {lesson:L1,de:"heilen",parts:["Der Arzt","kann","viele Krankheiten","heilt."],bad:3,fix:["heilen."],why:"Після модального дієслова kann стоїть інфінітив: heilen."},
+ {lesson:L1,de:"die Behandlung",parts:["Der Patient","bekommt","ein Behandlung","im Krankenhaus."],bad:2,fix:["eine Behandlung"],why:"Behandlung жіночого роду: eine Behandlung."},
+ {lesson:L1,de:"entstehen",parts:["In der Stadt","entstehen","viel neue","Arbeitsplätze."],bad:2,fix:["viele neue"],why:"Arbeitsplätze у множині: viele neue Arbeitsplätze."},
+ {lesson:L1,de:"streng sein",parts:["Mein Chef","ist","sehr","strenge."],bad:3,fix:["streng."],why:"Після sein прикметник без закінчення: ist streng."},
+ {lesson:L1,de:"im Vergleich zu / im Gegensatz zu",parts:["Im Gegensatz","zu mein Bruder","arbeite ich","gern im Team."],bad:1,fix:["zu meinem Bruder"],why:"Після zu стоїть Dativ: zu meinem Bruder (der Bruder)."},
+ {lesson:L1,de:"schwierig",parts:["Das ist","ein schwierig","Beruf."],bad:1,fix:["ein schwieriger"],why:"Перед чоловічим іменником прикметник має закінчення: ein schwieriger Beruf."},
+ {lesson:L1,de:"schlecht",parts:["Die Arbeit","ist","schlecht","bezahlen."],bad:3,fix:["bezahlt."],why:"Тут потрібен Partizip II: schlecht bezahlt."},
+ {lesson:L1,de:"der Grund ist, dass",parts:["Der Grund ist,","das","es zu wenig","Pflegekräfte gibt."],bad:1,fix:["dass"],why:"Сполучник пишемо dass (з -ss). Das є артиклем або займенником."},
+ {lesson:L1,de:"das Gehalt",parts:["Mein Gehalt","kommen","immer","am Monatsende."],bad:1,fix:["kommt"],why:"Підмет в однині: das Gehalt kommt."},
+ {lesson:L1,de:"der Lohn",parts:["Das Lohn","ist","in diesem Betrieb","zu niedrig."],bad:0,fix:["Der Lohn"],why:"Lohn чоловічого роду: der Lohn."},
+ {lesson:L1,de:"froh",parts:["Ich bin","froh","für","die Nachricht."],bad:2,fix:["über"],why:"Froh вживається з über + Akkusativ: froh über die Nachricht."},
+ {lesson:L1,de:"laut",parts:["Die Maschinen","ist","zu","laut."],bad:1,fix:["sind"],why:"Підмет у множині: die Maschinen sind."},
+ {lesson:L1,de:"häufig",parts:["Pflegekräfte","arbeiten","häufig","an Wochenende."],bad:3,fix:["am Wochenende.","an Wochenenden."],why:"Правильно: am Wochenende (an dem) або an Wochenenden (множина)."},
+ {lesson:L1,de:"gefährlich",parts:["Die Arbeit","ist","gefährlich","für der Gesundheit."],bad:3,fix:["für die Gesundheit."],why:"Після für стоїть Akkusativ: für die Gesundheit."},
+ {lesson:L1,de:"traurig",parts:["Ich bin traurig,","weil mein Kollege","verlässt den Betrieb."],bad:2,fix:["den Betrieb verlässt."],why:"У реченні з weil дієслово стоїть наприкінці: weil mein Kollege den Betrieb verlässt."},
+ {lesson:L1,de:"erledigen",parts:["Ich habe","alle Aufgaben","geerledigt."],bad:2,fix:["erledigt."],why:"Дієслова з префіксом er- не мають ge- у Partizip II: erledigt."}
+];
+
+// по одній ситуації на кожну фразу
+var SITS=[
+ {lesson:L1,de:"der Betrieb",sit:"Dein Freund fragt: „Wo arbeitet dein Vater?“ Die Firma ist nicht groß.",uk:"Твій друг питає: «Де працює твій тато?» Фірма невелика.",ok:"Mein Vater arbeitet in einem kleinen Betrieb.",opts:["Mein Vater arbeitet in einem kleinen Betrieb.","Die Arbeit in der Pflege ist manchmal schwierig.","In der Fabrik ist es sehr laut.","Mein Gehalt kommt immer am Monatsende."]},
+ {lesson:L1,de:"etwas von Hand machen",sit:"Du bist in einer Bäckerei. Ein Kunde fragt: „Machen Sie die Brötchen mit einer Maschine?“",uk:"Ти в пекарні. Клієнт питає: «Ви печете булочки машиною?»",ok:"Die Brötchen werden hier noch von Hand gemacht.",opts:["Die Brötchen werden hier noch von Hand gemacht.","Nach der Schule mache ich eine Ausbildung als Krankenpfleger.","Mein Gehalt kommt immer am Monatsende.","Pflegekräfte arbeiten häufig am Wochenende."]},
+ {lesson:L1,de:"die Ausbildung",sit:"Deine Lehrerin fragt: „Was machst du nach der Schule?“ Du möchtest Krankenpfleger werden und im Betrieb lernen.",uk:"Твоя вчителька питає: «Що ти робитимеш після школи?» Ти хочеш стати медбратом і навчатися на підприємстві.",ok:"Nach der Schule mache ich eine Ausbildung als Krankenpfleger.",opts:["Nach der Schule mache ich eine Ausbildung als Krankenpfleger.","Die Ärztin kann viele Krankheiten heilen.","Die Arbeit auf der Baustelle ist gefährlich.","Der Lohn ist in diesem Betrieb zu niedrig."]},
+ {lesson:L1,de:"als Pflegekraft arbeiten",sit:"Dein Freund fragt: „Was macht deine Tante beruflich?“ Sie hilft kranken Menschen im Krankenhaus.",uk:"Твій друг питає: «Ким працює твоя тітка?» Вона допомагає хворим у лікарні.",ok:"Meine Tante arbeitet als Pflegekraft in einem Krankenhaus.",opts:["Meine Tante arbeitet als Pflegekraft in einem Krankenhaus.","Die Brötchen werden hier noch von Hand gemacht.","Mein Gehalt kommt immer am Monatsende.","Ich bin traurig, weil mein Kollege den Betrieb verlässt."]},
+ {lesson:L1,de:"heilen",sit:"Dein kleiner Bruder fragt: „Was kann eine Ärztin machen?“",uk:"Твій молодший брат питає: «Що вміє робити лікарка?»",ok:"Die Ärztin kann viele Krankheiten heilen.",opts:["Die Ärztin kann viele Krankheiten heilen.","Mein Vater arbeitet in einem kleinen Betrieb.","Der Lohn ist in diesem Betrieb zu niedrig.","In der Fabrik ist es sehr laut."]},
+ {lesson:L1,de:"die Behandlung",sit:"Dein Opa liegt im Krankenhaus. Deine Mutter fragt: „Wie lange muss er dort bleiben?“",uk:"Твій дідусь лежить у лікарні. Мама питає: «Як довго він має там бути?»",ok:"Die Behandlung im Krankenhaus dauert zwei Wochen.",opts:["Die Behandlung im Krankenhaus dauert zwei Wochen.","Nach der Schule mache ich eine Ausbildung als Krankenpfleger.","Mein Gehalt kommt immer am Monatsende.","Ich muss noch ein paar Aufgaben erledigen."]},
+ {lesson:L1,de:"entstehen",sit:"Dein Lehrer fragt: „Was ändert sich in unserer Stadt?“ Es gibt bald viele neue Jobs.",uk:"Твій вчитель питає: «Що змінюється в нашому місті?» Скоро буде багато нових робочих місць.",ok:"In der Stadt entstehen viele neue Arbeitsplätze.",opts:["In der Stadt entstehen viele neue Arbeitsplätze.","Mein Chef ist sehr streng, aber gerecht.","Pflegekräfte arbeiten häufig am Wochenende.","Ich muss noch ein paar Aufgaben erledigen."]},
+ {lesson:L1,de:"streng sein",sit:"Deine Freundin fragt: „Wie ist dein neuer Chef?“ Er hat viele Regeln, aber er ist fair.",uk:"Твоя подруга питає: «Який твій новий начальник?» Він має багато правил, але справедливий.",ok:"Mein Chef ist sehr streng, aber gerecht.",opts:["Mein Chef ist sehr streng, aber gerecht.","Die Behandlung im Krankenhaus dauert zwei Wochen.","Nach der Schule mache ich eine Ausbildung als Krankenpfleger.","Die Arbeit auf der Baustelle ist gefährlich."]},
+ {lesson:L1,de:"im Vergleich zu / im Gegensatz zu",sit:"Dein Opa erzählt: „Früher haben wir alles mit der Hand gemacht.“ Du sagst: Heute ist das anders.",uk:"Твій дідусь розповідає: «Раніше ми все робили вручну.» Ти кажеш: сьогодні все інакше.",ok:"Im Vergleich zu früher gibt es heute mehr Maschinen.",opts:["Im Vergleich zu früher gibt es heute mehr Maschinen.","Die Ärztin kann viele Krankheiten heilen.","Mein Gehalt kommt immer am Monatsende.","Ich bin traurig, weil mein Kollege den Betrieb verlässt."]},
+ {lesson:L1,de:"schwierig",sit:"Du machst ein Praktikum im Krankenhaus. Dein Freund fragt: „Ist die Arbeit leicht?“",uk:"Ти проходиш практику в лікарні. Друг питає: «Робота легка?»",ok:"Die Arbeit in der Pflege ist manchmal schwierig.",opts:["Die Arbeit in der Pflege ist manchmal schwierig.","Mein Vater arbeitet in einem kleinen Betrieb.","In der Stadt entstehen viele neue Arbeitsplätze.","Ich bin froh, dass ich eine neue Arbeit gefunden habe."]},
+ {lesson:L1,de:"schlecht",sit:"Deine Cousine fragt: „Verdient man als Pflegekraft gut?“ Du sagst: Nein.",uk:"Твоя кузина питає: «Чи добре заробляють доглядальники?» Ти кажеш: ні.",ok:"Der Job ist leider schlecht bezahlt.",opts:["Der Job ist leider schlecht bezahlt.","Nach der Schule mache ich eine Ausbildung als Krankenpfleger.","Die Behandlung im Krankenhaus dauert zwei Wochen.","Ich bin traurig, weil mein Kollege den Betrieb verlässt."]},
+ {lesson:L1,de:"der Grund ist, dass",sit:"Dein Freund fragt: „Warum gibt es in den Krankenhäusern so viel Stress?“",uk:"Твій друг питає: «Чому в лікарнях так багато стресу?»",ok:"Der Grund ist, dass es zu wenig Pflegekräfte gibt.",opts:["Der Grund ist, dass es zu wenig Pflegekräfte gibt.","Die Behandlung im Krankenhaus dauert zwei Wochen.","Die Brötchen werden hier noch von Hand gemacht.","In der Fabrik ist es sehr laut."]},
+ {lesson:L1,de:"das Gehalt",sit:"Du arbeitest im Büro. Dein Freund fragt: „Wann bekommst du dein Geld?“",uk:"Ти працюєш в офісі. Друг питає: «Коли ти отримуєш гроші?»",ok:"Mein Gehalt kommt immer am Monatsende.",opts:["Mein Gehalt kommt immer am Monatsende.","Die Arbeit in der Pflege ist manchmal schwierig.","Pflegekräfte arbeiten häufig am Wochenende.","Mein Chef ist sehr streng, aber gerecht."]},
+ {lesson:L1,de:"der Lohn",sit:"Dein Onkel arbeitet in einer Fabrik. Er sagt: „Ich bekomme zu wenig Geld pro Stunde.“ Du stimmst ihm zu.",uk:"Твій дядько працює на фабриці. Він каже: «Я отримую замало грошей за годину.» Ти погоджуєшся.",ok:"Der Lohn ist in diesem Betrieb zu niedrig.",opts:["Der Lohn ist in diesem Betrieb zu niedrig.","Die Ärztin kann viele Krankheiten heilen.","In der Stadt entstehen viele neue Arbeitsplätze.","Die Arbeit auf der Baustelle ist gefährlich."]},
+ {lesson:L1,de:"froh",sit:"Deine Mutter fragt: „Wie geht es dir?“ Du hast gestern eine neue Arbeit gefunden.",uk:"Твоя мама питає: «Як ти?» Вчора ти знайшла нову роботу.",ok:"Ich bin froh, dass ich eine neue Arbeit gefunden habe.",opts:["Ich bin froh, dass ich eine neue Arbeit gefunden habe.","Ich bin traurig, weil mein Kollege den Betrieb verlässt.","Die Behandlung im Krankenhaus dauert zwei Wochen.","Der Job ist leider schlecht bezahlt."]},
+ {lesson:L1,de:"laut",sit:"Dein Freund besucht dich in der Fabrik. Er sagt: „Ich verstehe dich kaum!“",uk:"Твій друг відвідав тебе на фабриці. Він каже: «Я тебе ледве чую!»",ok:"In der Fabrik ist es sehr laut.",opts:["In der Fabrik ist es sehr laut.","Mein Vater arbeitet in einem kleinen Betrieb.","Meine Tante arbeitet als Pflegekraft in einem Krankenhaus.","Mein Gehalt kommt immer am Monatsende."]},
+ {lesson:L1,de:"häufig",sit:"Deine Freundin fragt: „Haben Pflegekräfte am Wochenende frei?“ Du sagst: Oft nicht.",uk:"Твоя подруга питає: «У доглядальників вихідні вільні?» Ти кажеш: часто ні.",ok:"Pflegekräfte arbeiten häufig am Wochenende.",opts:["Pflegekräfte arbeiten häufig am Wochenende.","Nach der Schule mache ich eine Ausbildung als Krankenpfleger.","In der Stadt entstehen viele neue Arbeitsplätze.","Der Lohn ist in diesem Betrieb zu niedrig."]},
+ {lesson:L1,de:"gefährlich",sit:"Dein Vater arbeitet auf einer Baustelle. Deine Oma macht sich Sorgen und fragt, warum.",uk:"Твій тато працює на будові. Бабуся хвилюється й питає чому.",ok:"Die Arbeit auf der Baustelle ist gefährlich.",opts:["Die Arbeit auf der Baustelle ist gefährlich.","Die Behandlung im Krankenhaus dauert zwei Wochen.","Mein Gehalt kommt immer am Monatsende.","Mein Chef ist sehr streng, aber gerecht."]},
+ {lesson:L1,de:"traurig",sit:"Dein Freund fragt: „Warum bist du heute so still?“ Dein Kollege geht weg.",uk:"Твій друг питає: «Чому ти сьогодні така тиха?» Твій колега йде.",ok:"Ich bin traurig, weil mein Kollege den Betrieb verlässt.",opts:["Ich bin traurig, weil mein Kollege den Betrieb verlässt.","Ich bin froh, dass ich eine neue Arbeit gefunden habe.","In der Stadt entstehen viele neue Arbeitsplätze.","Ich muss noch ein paar Aufgaben erledigen."]},
+ {lesson:L1,de:"erledigen",sit:"Deine Mutter fragt: „Hast du heute viel zu tun?“ Du hast noch einige Aufgaben auf deiner Liste.",uk:"Твоя мама питає: «У тебе сьогодні багато справ?» У твоєму списку ще кілька завдань.",ok:"Ich muss noch ein paar Aufgaben erledigen.",opts:["Ich muss noch ein paar Aufgaben erledigen.","Meine Tante arbeitet als Pflegekraft in einem Krankenhaus.","Der Grund ist, dass es zu wenig Pflegekräfte gibt.","Die Arbeit auf der Baustelle ist gefährlich."]}
+];
+
+// групи для «виделок»: зайві варіанти беруться з іншої групи, щоб не збігатися за змістом
+var GRP={"der Betrieb":1,"die Ausbildung":1,"als Pflegekraft arbeiten":1,"das Gehalt":1,"der Lohn":1,"etwas von Hand machen":1,
+ "heilen":2,"die Behandlung":2,
+ "entstehen":3,"im Vergleich zu / im Gegensatz zu":3,"der Grund ist, dass":3,
+ "streng sein":4,"schwierig":4,"schlecht":4,"froh":4,"laut":4,"häufig":4,"gefährlich":4,"traurig":4,
+ "erledigen":5};
+
+var KINDS={D:"Дія (що робити?)",R:"Хто? Що? (іменник)",O:"Який? Як? (опис)",Z:"Зв’язки й підсилювачі",F:"Ціла фраза / репліка",S:"Почати / додати",P:"Протиставити",U:"Підсумувати",I:"Підсилити думку"};
+var CORE=["D","R","O","Z","F"], CONN=["S","P","U","I"];
+var INT=[1,3,7,14,30,60], BATCH=20, KEY="vlada-de-v1";
+
+/* ===================== УТИЛІТИ ===================== */
+var $=function(s,r){return (r||document).querySelector(s)};
+function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;if(tag==="button")e.type="button";return e}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function norm(s){return String(s).toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim()}
+function tokens(s){var o={};norm(s).split(" ").forEach(function(w){if(w.length>3)o[w]=1});return o}
+function today(){var d=new Date();d.setHours(0,0,0,0);return d.getTime()}
+function addDays(ts,n){var d=new Date(ts);d.setDate(d.getDate()+n);d.setHours(0,0,0,0);return d.getTime()}
+function dayKey(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
+function clean(de){return de.replace(/\(.*?\)/g,"").replace(/\.\.\.|…/g," ").replace(/\s*\/\s*/g,", ").replace(/\s+/g," ").trim()}
+function sayText(c){return c.say||clean(c.de)}
+var byDe={};CARDS.forEach(function(c){byDe[c.de]=c});
+var LESSONS=[];CARDS.forEach(function(c){if(LESSONS.indexOf(c.lesson)<0)LESSONS.push(c.lesson)});
+var ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
+/* ===================== СТАН ТА ЗБЕРЕЖЕННЯ ===================== */
+var S={prog:{},sess:{},sel:[],all:true,mode:"today",rand:false,rev:false,voice:"",src:"all",ex:"pairs",tab:"cards"};
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);if(!raw)return;
+    var o=JSON.parse(raw);if(!o||typeof o!=="object")return;
+    if(o.prog&&typeof o.prog==="object")S.prog=o.prog;
+    if(o.sess&&typeof o.sess==="object")S.sess=o.sess;
+    var u=o.ui||{};
+    if(Array.isArray(u.sel))S.sel=u.sel;
+    if(typeof u.all==="boolean")S.all=u.all;
+    if(typeof u.mode==="string")S.mode=u.mode;
+    if(typeof u.rand==="boolean")S.rand=u.rand;
+    if(typeof u.rev==="boolean")S.rev=u.rev;
+    if(typeof u.voice==="string")S.voice=u.voice;
+    if(typeof u.src==="string")S.src=u.src;
+    if(typeof u.ex==="string")S.ex=u.ex;
+  }catch(e){}
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify({v:1,prog:S.prog,sess:S.sess,ui:{sel:S.sel,all:S.all,mode:S.mode,rand:S.rand,rev:S.rev,voice:S.voice,src:S.src,ex:S.ex}}))}catch(e){}
+}
+function P(de){
+  var p=S.prog[de];
+  if(!p||typeof p!=="object"){p=S.prog[de]={b:0,d:0,r:0,n:0,w:0,x:{}}}
+  if(!p.x||typeof p.x!=="object")p.x={};
+  return p;
+}
+function selLessons(){
+  if(S.all)return LESSONS;
+  var s=S.sel.filter(function(l){return LESSONS.indexOf(l)>=0});
+  return s.length?s:LESSONS;
+}
+function pool(){var ls=selLessons();return CARDS.filter(function(c){return ls.indexOf(c.lesson)>=0})}
+function stats(pl){var k=0,r=0,n=0;pl.forEach(function(c){var p=P(c.de);if(p.r)r++;else if(p.b>0)k++;else n++});return{k:k,r:r,n:n}}
+
+/* ===================== ОЗВУЧКА ===================== */
+var NOVELTY=/albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|junior|kathy|organ|princess|ralph|superstar|trinoids|whisper|wobble|zarvox|fred/i;
+var MEH=/eddy|flo\b|grandma|grandpa|reed|rocko|sandy|shelley/i;
+var voices=[];
+function vscore(v){
+  var n=(v.name||"")+" "+(v.voiceURI||""),s=0;
+  if(/natural|neural|premium|enhanced|siri|google/i.test(n))s+=10;
+  if(/premium|enhanced|neural|natural/i.test(n))s+=3;
+  if(/^de[-_]de/i.test(v.lang||""))s+=3;else if(/^de/i.test(v.lang||""))s+=1;
+  if(NOVELTY.test(v.name||""))s-=100;
+  if(MEH.test(v.name||""))s-=3;
+  return s;
+}
+function loadVoices(){
+  try{
+    var all=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    voices=all.filter(function(v){return /^de/i.test(v.lang||"")&&vscore(v)>-50}).sort(function(a,b){return vscore(b)-vscore(a)});
+  }catch(e){voices=[]}
+  fillVoices();
+}
+function pickVoice(){
+  if(S.voice){for(var i=0;i<voices.length;i++)if(voices[i].voiceURI===S.voice)return voices[i]}
+  return voices[0]||null;
+}
+function speak(text,rate){
+  try{
+    if(!window.speechSynthesis)return;
+    var u=new SpeechSynthesisUtterance(text),v=pickVoice();
+    if(v){u.voice=v;u.lang=v.lang}else u.lang="de-DE";
+    u.rate=rate||0.9;
+    speechSynthesis.cancel();speechSynthesis.speak(u);
+  }catch(e){}
+}
+function sayBtn(text,rate,cls){
+  var b=el("button",cls||"say",ICON);b.setAttribute("aria-label","Прослухати");
+  b.addEventListener("click",function(e){e.stopPropagation();speak(text,rate)});
+  return b;
+}
+function fillVoices(){
+  var sel=$("#voice");if(!sel)return;
+  sel.innerHTML="";
+  var o=el("option",null,"Авто (найприродніший)");o.value="";sel.append(o);
+  voices.forEach(function(v){var op=el("option",null,esc(v.name+" ("+v.lang+")"+(vscore(v)>=10?" ★":"")));op.value=v.voiceURI;sel.append(op)});
+  sel.value=S.voice;
+  if(sel.value!==S.voice){S.voice="";sel.value=""}
+}
+
+/* ===================== КАРТКИ: ЧЕРГА ТА СЕСІЯ ===================== */
+function sigNow(){return S.mode+"|"+(S.all?"*":selLessons().join("+"))}
+function buildIds(){
+  var pl=pool(),t=today(),ids;
+  function rr(a){return S.rand?shuffle(a):a}
+  if(S.mode==="today"){
+    var rep=pl.filter(function(c){return P(c.de).r});
+    var due=pl.filter(function(c){var p=P(c.de);return !p.r&&p.b>0&&p.d<=t}).sort(function(a,b){return P(a.de).d-P(b.de).d});
+    var nw=pl.filter(function(c){var p=P(c.de);return !p.r&&p.b===0});
+    ids=rr(rep).concat(rr(due),rr(nw)).slice(0,BATCH);
+  }else if(S.mode==="rep"){ids=rr(pl.filter(function(c){return P(c.de).r}))}
+  else if(S.mode==="new"){ids=rr(pl.filter(function(c){var p=P(c.de);return !p.r&&p.b===0}))}
+  else ids=rr(pl);
+  return ids.map(function(c){return c.de});
+}
+function newSess(sig,ids){
+  var s={ids:ids||buildIds(),pos:0,res:{},done:false,day:dayKey()};
+  if(s.ids.length){S.sess[sig]=s;save()}
+  return s;
+}
+function getSess(){
+  var sig=sigNow(),s=S.sess[sig],ok=s&&Array.isArray(s.ids)&&typeof s.pos==="number"&&s.res&&typeof s.res==="object";
+  if(ok){
+    s.ids=s.ids.filter(function(id){return byDe[id]});
+    if(s.pos>s.ids.length)s.pos=s.ids.length;
+    if(s.ids.length&&s.pos>=s.ids.length)s.done=true;
+    if(!s.ids.length)ok=false;
+    if(ok&&s.done&&S.mode==="today"&&s.day!==dayKey())ok=false;
+  }
+  return ok?s:newSess(sig);
+}
+function rate(known){
+  var s=getSess();if(s.done||!s.ids.length)return;
+  var id=s.ids[s.pos],p=P(id);
+  p.n++;
+  if(known){p.r=0;p.b=Math.min((p.b||0)+1,6);p.d=addDays(today(),INT[p.b-1])}
+  else{p.r=1;p.b=0;p.d=today();p.w=(p.w||0)+1}
+  s.res[id]=known?"k":"r";
+  s.pos++;
+  if(s.pos>=s.ids.length)s.done=true;
+  save();renderCards();renderStats();
+}
+
+/* ===================== РЕНДЕР: ШАПКА, УРОКИ ===================== */
+function renderStats(){
+  var pl=pool(),st=stats(pl);
+  $("#stats").innerHTML='<span class="chip">'+pl.length+' фраз</span><span class="chip k">Знаю '+st.k+'</span><span class="chip r">Повторити '+st.r+'</span>';
+}
+function renderLessons(){
+  var box=$("#lessons");box.innerHTML="";
+  var all=el("button","lchip all","Усі уроки · мікс <small>"+CARDS.length+"</small>");
+  all.setAttribute("aria-pressed",S.all?"true":"false");
+  all.addEventListener("click",function(){S.all=true;S.sel=[];afterSel()});
+  box.append(all);
+  LESSONS.forEach(function(l){
+    var n=CARDS.filter(function(c){return c.lesson===l}).length;
+    var b=el("button","lchip",esc(l)+" <small>"+n+"</small>");
+    b.setAttribute("aria-pressed",(!S.all&&S.sel.indexOf(l)>=0)?"true":"false");
+    b.addEventListener("click",function(){
+      if(S.all){S.all=false;S.sel=[l]}
+      else{var i=S.sel.indexOf(l);if(i>=0)S.sel.splice(i,1);else S.sel.push(l);
+        if(!S.sel.length||S.sel.length>=LESSONS.length){S.all=true;S.sel=[]}}
+      afterSel();
+    });
+    box.append(b);
+  });
+}
+function afterSel(){R=null;save();renderLessons();renderStats();renderCards();renderExTabs();drawEx()}
+
+/* ===================== РЕНДЕР: КАРТКИ ===================== */
+var MODE_NOTE={today:"Порція до 20 карток: спершу «повторити», потім ті, яким настав час, потім нові.",all:"Усі фрази обраних уроків підряд.",rep:"Лише фрази, які ти позначила «Повторити».",new:"Лише фрази, які ще не відкривались."};
+function renderCards(){
+  $("#mode").value=S.mode;
+  $("#rand").setAttribute("aria-pressed",S.rand?"true":"false");
+  $("#rev").setAttribute("aria-pressed",S.rev?"true":"false");
+  $("#modeNote").textContent=MODE_NOTE[S.mode]||"";
+  var area=$("#cardArea");area.innerHTML="";
+  var s=getSess();
+  if(!s.ids.length){
+    var p=el("div","panel");
+    p.append(el("h2",null,S.mode==="today"?"На сьогодні все":"Тут поки порожньо"));
+    p.append(el("p","muted",S.mode==="today"?"Нові слова й повторення з’являться, коли настане час. Можна відкрити «Усі картки» або піти до вправ.":S.mode==="rep"?"Немає фраз у повторенні. Познач «Повторити» на картках.":"Немає нових фраз в обраних уроках."));
+    var row=el("div","row");
+    var b1=el("button","btn btn-plain btn-sm","Усі картки");b1.onclick=function(){S.mode="all";save();renderCards()};
+    var b2=el("button","btn btn-dark btn-sm","До вправ");b2.onclick=function(){gotoTab("ex")};
+    row.append(b1,b2);p.append(row);area.append(p);return;
+  }
+  if(s.done){renderSummary(area,s);return}
+  var id=s.ids[s.pos],c=byDe[id],total=s.ids.length;
+  var prog=el("div","progress");
+  prog.innerHTML='<span>'+(s.pos+1)+' / '+total+'</span><div class="bar"><i style="width:'+Math.round(s.pos/total*100)+'%"></i></div>';
+  var again=el("button","linkbtn","почати заново");
+  again.onclick=function(){S.sess[sigNow()]=newSess(sigNow());renderCards()};
+  prog.append(again);area.append(prog);
+
+  var scene=el("div","scene"),card=el("div","card");card.id="card";card.tabIndex=0;
+  var rev=S.rev;
+  var front=el("div","face front");
+  var ft=el("div","face-top");
+  ft.append(el("span","lang",(rev?"UA":"DE")+' <span class="tag">'+esc(c.lesson)+'</span>'));
+  if(!rev)ft.append(sayBtn(sayText(c)));
+  front.append(ft);
+  front.append(el("div","main",'<p class="phrase">'+esc(rev?c.uk:c.de)+'</p>'));
+  front.append(el("div","hint","Торкнись, щоб перевернути"));
+
+  var back=el("div","face back");
+  var bh=el("div","back-head"),t=el("div","t");
+  t.append(el("p","big",esc(rev?c.de:c.uk)));
+  if(rev)t.append(el("p","small",esc(c.uk)));
+  var side=el("div","side");
+  side.append(sayBtn(sayText(c)));
+  var du=el("a","dict","Duden");du.href="https://www.duden.de/suchen/dudenonline/"+encodeURIComponent(c.dict||c.de);du.target="_blank";du.rel="noopener noreferrer";
+  du.addEventListener("click",function(e){e.stopPropagation()});
+  side.append(du);bh.append(t,side);back.append(bh);
+
+  var bx=el("div","block");bx.append(el("div","label","Приклад"));
+  var p=el("p","ex"),parts=c.ex.split("___");
+  p.append(document.createTextNode(parts[0]));
+  var gi=document.createElement("input");gi.type="text";gi.id="backGap";gi.className="gap-in";gi.size=Math.max(6,c.ans.length+1);
+  gi.setAttribute("autocomplete","off");gi.setAttribute("autocapitalize","none");gi.setAttribute("autocorrect","off");gi.spellcheck=false;gi.setAttribute("aria-label","Впиши пропущене слово");
+  gi.addEventListener("click",function(e){e.stopPropagation()});
+  p.append(gi,document.createTextNode(parts[1]||""));bx.append(p);
+  var gf=el("p","gap-fb");gf.setAttribute("role","status");
+  var grow=el("div","row"),gc=el("button","btn btn-plain btn-sm","Перевірити"),gs=el("button","linkbtn","Показати слово");
+  grow.append(gc,gs);
+  function gcheck(){
+    var v=gi.value.trim();if(!v)return;
+    if(norm(v)===norm(c.ans)){gi.disabled=true;gi.classList.remove("wrong");gi.classList.add("good");gf.className="gap-fb good";gf.textContent="Правильно!";grow.hidden=true}
+    else{gi.classList.add("wrong");gf.className="gap-fb wrong";gf.textContent="Не зовсім. Спробуй ще раз."}
+  }
+  gc.addEventListener("click",function(e){e.stopPropagation();gcheck()});
+  gs.addEventListener("click",function(e){e.stopPropagation();gi.value=c.ans;gi.disabled=true;gi.classList.remove("wrong");gi.classList.add("good");gf.className="gap-fb";gf.textContent="";grow.hidden=true});
+  gi.addEventListener("keydown",function(e){e.stopPropagation();if(e.key==="Enter"){e.preventDefault();gcheck()}});
+  gi.addEventListener("input",function(){gi.classList.remove("wrong");gf.textContent=""});
+  bx.append(gf,grow);back.append(bx);
+  var cb=el("div","block");cb.append(el("div","label","Колокації"));
+  var cl=el("div","cols");c.col.forEach(function(x){cl.append(el("span","col",esc(x)))});cb.append(cl);back.append(cb);
+
+  card.append(front,back);scene.append(card);area.append(scene);
+  card.addEventListener("click",function(e){if(e.target.closest("button,a"))return;card.classList.toggle("flipped")});
+  card.addEventListener("keydown",function(e){if(e.target===card&&(e.key==="Enter")){card.classList.toggle("flipped")}});
+
+  var act=el("div","actions");
+  var br=el("button","btn btn-r","Повторити"),bk=el("button","btn btn-k","Знаю");
+  br.onclick=function(){rate(false)};bk.onclick=function(){rate(true)};
+  act.append(br,bk);area.append(act);
+  area.append(el("p","keys",'<kbd>Пробіл</kbd> перевернути · <kbd>←</kbd> повторити · <kbd>→</kbd> знаю'));
+}
+function renderSummary(area,s){
+  var k=0,rl=[];
+  s.ids.forEach(function(id){if(s.res[id]==="k")k++;else if(s.res[id]==="r")rl.push(id)});
+  var p=el("div","panel");
+  p.append(el("h2",null,"Порція завершена"));
+  p.append(el("p","muted","Знаю: "+k+" · Повторити: "+rl.length+" · Усього: "+s.ids.length));
+  if(rl.length){
+    p.append(el("div","label","Слова для повторення"));
+    var ul=el("ul","list");rl.forEach(function(id){ul.append(el("li",null,"<b>"+esc(id)+"</b><span>"+esc(byDe[id].uk)+"</span>"))});p.append(ul);
+  }
+  var row=el("div","row");
+  if(rl.length){var b1=el("button","btn btn-r btn-sm","Повторити ці слова");b1.onclick=function(){S.sess[sigNow()]=newSess(sigNow(),rl.slice());renderCards()};row.append(b1)}
+  if(S.mode==="today"){var b2=el("button","btn btn-plain btn-sm","Ще порція");b2.onclick=function(){S.sess[sigNow()]=newSess(sigNow());renderCards()};row.append(b2)}
+  else{var b3=el("button","btn btn-plain btn-sm","Почати заново");b3.onclick=function(){S.sess[sigNow()]=newSess(sigNow());renderCards()};row.append(b3)}
+  var b4=el("button","btn btn-dark btn-sm","До вправ");b4.onclick=function(){gotoTab("ex")};row.append(b4);
+  p.append(row);area.append(p);
+}
+
+/* ===================== ВПРАВИ: ЗАГАЛЬНЕ ===================== */
+var EX=[
+ {k:"pairs",n:"Пари",d:"З’єднай німецьку фразу з перекладом. Дошки по 6 пар."},
+ {k:"gap",n:"Пропуск",d:"Впиши слово в речення. Є підказка-переклад і кнопка «Перша літера»."},
+ {k:"test",n:"Тест",d:"Обери правильний варіант із чотирьох, в обидва боки: DE → UA і UA → DE."},
+ {k:"dict",n:"Диктант",d:"Послухай фразу й напиши її. Іменники пиши з великої літери."},
+ {k:"fork",n:"Виделки",d:"Познач усі вирази, що поєднуються з ключовою фразою. Зайві не чіпай."},
+ {k:"cat",n:"Категорії",d:"Розклади фрази по групах за типом. Торкнись фрази, потім групи."},
+ {k:"fix",n:"Помилки",d:"У реченні одна помилка. Знайди її й виправ."},
+ {k:"sit",n:"Ситуації",d:"Що б ти сказала? Обери репліку, де є фраза уроку."}
+];
+var R=null;
+function exPool(){var pl=pool();return S.src==="rep"?pl.filter(function(c){return P(c.de).r}):pl}
+function manualForks(){var ls=selLessons();return S.src==="all"?FORKS.filter(function(f){return ls.indexOf(f.lesson)>=0}):[]}
+function inPool(a,pl){var m={};pl.forEach(function(c){m[c.de]=1});return a.filter(function(x){return m[x.de]})}
+function prio(items,key){
+  var g=items.map(function(c){return{c:c,u:P(c.de).x[key]}});
+  var first=shuffle(g.filter(function(o){return o.u!==1})),rest=shuffle(g.filter(function(o){return o.u===1}));
+  return first.concat(rest).map(function(o){return o.c});
+}
+function split(items,max){
+  if(!items.length)return[];
+  var n=Math.ceil(items.length/max),base=Math.floor(items.length/n),extra=items.length%n,out=[],i=0;
+  for(var b=0;b<n;b++){var sz=base+(b<extra?1:0);out.push(items.slice(i,i+sz));i+=sz}
+  return out;
+}
+function unitCount(k,pl){
+  if(k==="fork")return pl.length+manualForks().length;
+  if(k==="fix")return inPool(FIXES,pl).length;
+  if(k==="sit")return inPool(SITS,pl).length;
+  return pl.length;
+}
+function renderExTabs(){
+  var tabs=$("#exTabs");tabs.innerHTML="";var pl=exPool();
+  EX.forEach(function(x){
+    var b=el("button","ex-tab",esc(x.n)+"<small>"+unitCount(x.k,pl)+"</small>");
+    b.setAttribute("role","tab");b.setAttribute("aria-selected",x.k===S.ex?"true":"false");
+    b.onclick=function(){S.ex=x.k;R=null;save();renderExTabs();drawEx()};
+    tabs.append(b);
+  });
+  $("#srcAll").setAttribute("aria-pressed",S.src==="all"?"true":"false");
+  $("#srcRep").setAttribute("aria-pressed",S.src==="rep"?"true":"false");
+}
+function exInfo(k){return EX.filter(function(x){return x.k===k})[0]}
+function drawEx(){
+  var area=$("#exArea");area.innerHTML="";
+  if(R&&R.finished){drawResult(area);return}
+  if(R){drawTask(area);return}
+  var pl=exPool(),info=exInfo(S.ex);
+  var p=el("div","panel");
+  p.append(el("h2",null,esc(info.n)));
+  p.append(el("p","muted",esc(info.d)));
+  var built=pl.length?makeTasks(S.ex,pl):null;
+  if(!built||!built.tasks.length){
+    p.append(el("p","muted",S.src==="rep"?"У повторенні поки немає слів. Познач «Повторити» на картках або обери «Усі фрази».":"Для обраних уроків немає завдань цього типу."));
+    area.append(p);return;
+  }
+  var total=built.tasks.reduce(function(a,t){return a+t.units},0);
+  p.append(el("p","fb","У раунді "+total+" завдань, нових для тебе: "+built.fresh));
+  var b=el("button","btn btn-dark","Почати раунд");
+  b.onclick=function(){R={k:S.ex,tasks:built.tasks,i:0,ok:0,done:0,total:total,bad:[],seen:{},finished:false,added:false};drawEx()};
+  p.append(b);area.append(p);
+}
+function makeTasks(k,pl){
+  var tasks=[],fresh=0;
+  function freshOf(key){return pl.filter(function(c){return P(c.de).x[key]==null}).length}
+  if(k==="pairs"){
+    split(prio(pl,"p"),6).forEach(function(b){tasks.push({units:b.length,run:function(box,fin){runPairs(box,b,fin)}})});fresh=freshOf("p");
+  }else if(k==="gap"){
+    prio(pl,"g").forEach(function(c){tasks.push({units:1,run:function(box,fin){runGap(box,c,fin)}})});fresh=freshOf("g");
+  }else if(k==="test"){
+    prio(pl,"t").forEach(function(c){tasks.push({units:1,run:function(box,fin){runTest(box,c,fin)}})});fresh=freshOf("t");
+  }else if(k==="dict"){
+    prio(pl,"d").forEach(function(c){tasks.push({units:1,run:function(box,fin){runDict(box,c,fin)}})});fresh=freshOf("d");
+  }else if(k==="fork"){
+    prio(pl,"f").forEach(function(c){tasks.push({units:1,run:function(box,fin){runFork(box,autoFork(c),fin)}})});fresh=freshOf("f");
+    shuffle(manualForks()).forEach(function(f){tasks.push({units:1,run:function(box,fin){runFork(box,manualFork(f),fin)}})});
+  }else if(k==="cat"){
+    var kinds={};pl.forEach(function(c){kinds[c.kind||"F"]=1});
+    var hasCore=CORE.some(function(x){return kinds[x]}),hasConn=CONN.some(function(x){return kinds[x]});
+    var bins=(hasCore?CORE:[]).concat(hasConn?CONN:[]);
+    LESSONS.forEach(function(l){
+      var items=prio(pl.filter(function(c){return c.lesson===l}),"c");
+      split(items,8).forEach(function(b){tasks.push({units:b.length,run:function(box,fin){runCat(box,b,bins,fin)}})});
+    });fresh=freshOf("c");
+  }else if(k==="fix"){
+    var fx=inPool(FIXES,pl),order=prio(fx.map(function(f){return byDe[f.de]}),"m");
+    order.forEach(function(c){var f=fx.filter(function(x){return x.de===c.de})[0];tasks.push({units:1,run:function(box,fin){runFix(box,f,fin)}})});
+    fresh=order.filter(function(c){return P(c.de).x.m==null}).length;
+  }else if(k==="sit"){
+    var st=inPool(SITS,pl),ord=prio(st.map(function(f){return byDe[f.de]}),"s");
+    ord.forEach(function(c){var f=st.filter(function(x){return x.de===c.de})[0];tasks.push({units:1,run:function(box,fin){runSit(box,f,fin)}})});
+    fresh=ord.filter(function(c){return P(c.de).x.s==null}).length;
+  }
+  return{tasks:tasks,fresh:fresh};
+}
+function drawTask(area){
+  var t=R.tasks[R.i];
+  var box=el("div","panel");
+  var meta=el("div","q-meta");
+  var lbl=t.units>1?(R.done+1)+"–"+(R.done+t.units):""+(R.done+1);
+  meta.append(el("span",null,"Питання "+lbl+" з "+R.total));
+  var end=el("button","linkbtn","Завершити раунд");end.onclick=function(){R.finished=true;drawEx()};
+  meta.append(end);box.append(meta);
+  var inner=el("div","stack");box.append(inner);
+  area.append(box);
+  var called=false;
+  t.run(inner,function(results){
+    if(called)return;called=true;
+    results.forEach(function(r){
+      if(r.ok)R.ok++;
+      if(r.id){var p=P(r.id);p.x[R.k]=r.ok?1:2;if(!r.ok)p.w=(p.w||0)+1}
+      if(!r.ok){var key=r.id||r.label;if(!R.seen[key]){R.seen[key]=1;R.bad.push(r)}}
+    });
+    R.done+=t.units;save();renderStats();
+    var last=R.i>=R.tasks.length-1;
+    var nx=el("button","btn btn-dark",last?"Результат":"Далі →");
+    nx.onclick=function(){if(last){R.finished=true}else{R.i++}drawEx();window.scrollTo&&window.scrollTo(0,0)};
+    inner.append(nx);
+    try{nx.focus({preventScroll:true})}catch(e){}
+  });
+}
+function drawResult(area){
+  var p=el("div","panel");
+  p.append(el("h2",null,"Результат"));
+  p.append(el("div","score",R.ok+" <small>з "+R.done+"</small>"));
+  if(R.done<R.total)p.append(el("p","muted","Раунд завершено достроково: відповіли на "+R.done+" із "+R.total+"."));
+  else if(R.ok===R.done&&R.done>0)p.append(el("p","muted","Без помилок."));
+  var ids=[];
+  if(R.bad.length){
+    p.append(el("div","label","Помилки"));
+    var ul=el("ul","list");
+    R.bad.forEach(function(r){
+      var c=r.id?byDe[r.id]:null;if(r.id)ids.push(r.id);
+      ul.append(el("li",null,"<b>"+esc(r.label)+"</b><span>"+esc(c?c.uk:(r.note||""))+"</span>"));
+    });
+    p.append(ul);
+  }
+  var row=el("div","row");
+  if(ids.length){
+    var add=el("button","btn btn-r btn-sm","Додати ці слова в повторення");
+    add.onclick=function(){ids.forEach(function(id){var q=P(id);q.r=1;q.b=0;q.d=today()});save();add.disabled=true;add.textContent="Додано в повторення";renderStats();renderCards();renderExTabs()};
+    row.append(add);
+  }
+  var again=el("button","btn btn-dark btn-sm","Новий раунд");again.onclick=function(){R=null;renderExTabs();drawEx()};
+  var cards=el("button","btn btn-plain btn-sm","До карток");cards.onclick=function(){R=null;renderExTabs();gotoTab("cards")};
+  row.append(again,cards);p.append(row);area.append(p);
+  renderExTabs();
+}
+
+/* ===================== ВПРАВИ: ОКРЕМІ ТИПИ ===================== */
+function runPairs(box,items,fin){
+  var res=items.map(function(c){return{id:c.de,label:c.de,ok:true}});
+  var byId={};res.forEach(function(r){byId[r.id]=r});
+  box.append(el("p","muted","З’єднай німецьку фразу з перекладом."));
+  var g=el("div","match"),cl=el("div","colm"),cr=el("div","colm");g.append(cl,cr);box.append(g);
+  function mk(c,side){var b=el("button","m");b.textContent=side==="l"?c.de:c.uk;b.dataset.id=c.de;return b}
+  shuffle(items).forEach(function(c){cl.append(mk(c,"l"))});
+  shuffle(items).forEach(function(c){cr.append(mk(c,"r"))});
+  var a=null,b=null,solved=0;
+  g.addEventListener("click",function(e){
+    var bt=e.target.closest(".m");if(!bt||bt.classList.contains("ok")||bt.classList.contains("no"))return;
+    if(bt.parentNode===cl){if(a)a.classList.remove("sel");a=bt}else{if(b)b.classList.remove("sel");b=bt}
+    bt.classList.add("sel");
+    if(a&&b){
+      var x=a,y=b;a=b=null;
+      if(x.dataset.id===y.dataset.id){
+        x.classList.remove("sel");y.classList.remove("sel");x.classList.add("ok");y.classList.add("ok");solved++;
+        if(solved===items.length)fin(res);
+      }else{
+        byId[x.dataset.id].ok=false;
+        x.classList.remove("sel");y.classList.remove("sel");x.classList.add("no");y.classList.add("no");
+        setTimeout(function(){x.classList.remove("no");y.classList.remove("no")},450);
+      }
+    }
+  });
+}
+function runGap(box,c,fin){
+  var parts=c.ex.split("___");
+  box.append(el("p","muted","Підказка: "+esc(c.uk)));
+  var p=el("p","q-sent");p.append(document.createTextNode(parts[0]));
+  var inp=document.createElement("input");inp.type="text";inp.id="gapIn";inp.size=Math.max(7,c.ans.length+2);
+  inp.setAttribute("autocomplete","off");inp.setAttribute("autocapitalize","none");inp.setAttribute("autocorrect","off");inp.spellcheck=false;inp.setAttribute("aria-label","Пропущене слово");
+  p.append(inp,document.createTextNode(parts[1]||""));box.append(p);
+  var row=el("div","row"),hb=el("button","btn btn-plain btn-sm","Перша літера"),ck=el("button","btn btn-r btn-sm","Перевірити");
+  row.append(hb,ck);box.append(row);
+  var fb=el("p","fb");fb.setAttribute("role","status");box.append(fb);
+  var done=false;
+  hb.onclick=function(){if(done)return;if(!inp.value)inp.value=c.ans.charAt(0);inp.focus()};
+  function check(){
+    if(done)return;var v=inp.value.trim();if(!v)return;
+    done=true;var ok=norm(v)===norm(c.ans);
+    inp.disabled=true;hb.disabled=true;ck.disabled=true;inp.classList.add(ok?"good":"wrong");
+    fb.className="fb "+(ok?"good":"wrong");
+    var note=ok&&/^[A-ZÄÖÜ]/.test(c.ans)&&/^[a-zäöü]/.test(v)?" Іменники пишемо з великої: "+c.ans+".":"";
+    fb.textContent=ok?"Правильно!"+note:"Не зовсім. Правильно: "+c.ans;
+    var full=c.ex.replace("___",c.ans);
+    var f=el("div","row");f.append(el("span","muted",esc(full)),sayBtn(full,0.9,"say"));box.append(f);
+    fin([{id:c.de,label:c.de,ok:ok}]);
+  }
+  ck.onclick=check;inp.addEventListener("keydown",function(e){if(e.key==="Enter")check()});
+  try{inp.focus({preventScroll:true})}catch(e){}
+}
+function runTest(box,c,fin){
+  var rev=Math.random()<0.5;
+  var opts=shuffle([c].concat(shuffle(CARDS.filter(function(x){return x.de!==c.de})).slice(0,3)));
+  box.append(el("div","label",rev?"UA → DE":"DE → UA"));
+  var q=el("div","q-phrase");q.append(el("p","big",esc(rev?c.uk:c.de)));
+  if(!rev)q.append(sayBtn(sayText(c)));
+  box.append(q);
+  var list=el("div","opts");box.append(list);
+  var fb=el("p","fb");fb.setAttribute("role","status");box.append(fb);
+  var done=false;
+  opts.forEach(function(o){
+    var b=el("button","opt");b.textContent=rev?o.de:o.uk;
+    b.onclick=function(){
+      if(done)return;done=true;var ok=o.de===c.de;
+      Array.prototype.forEach.call(list.children,function(n,i){n.disabled=true;if(opts[i].de===c.de)n.classList.add("good")});
+      if(!ok)b.classList.add("wrong");
+      fb.className="fb "+(ok?"good":"wrong");
+      fb.textContent=ok?"Правильно!":"Правильно: "+(rev?c.de:c.uk);
+      fin([{id:c.de,label:c.de,ok:ok}]);
+    };
+    list.append(b);
+  });
+}
+function runDict(box,c,fin){
+  var target=sayText(c),has=!!window.speechSynthesis;
+  box.append(el("p","muted",has?"Послухай і напиши те, що чуєш.":"Озвучка недоступна в цьому браузері. Напиши фразу за підказкою: "+esc(c.uk)));
+  var play=el("div","play");
+  var b1=el("button","btn btn-plain btn-sm","Прослухати"),b2=el("button","btn btn-plain btn-sm","Повільніше");
+  b1.onclick=function(){speak(target,0.9)};b2.onclick=function(){speak(target,0.55)};
+  if(has)play.append(b1,b2);box.append(play);
+  var inp=document.createElement("input");inp.type="text";inp.id="dictIn";inp.className="typed";
+  inp.setAttribute("autocomplete","off");inp.setAttribute("autocapitalize","none");inp.setAttribute("autocorrect","off");inp.spellcheck=false;inp.setAttribute("aria-label","Твоя відповідь");
+  box.append(inp);
+  var ck=el("button","btn btn-r btn-sm","Перевірити");box.append(ck);
+  var fb=el("p","fb");fb.setAttribute("role","status");box.append(fb);
+  var done=false;
+  function check(){
+    if(done)return;var v=inp.value.trim();if(!v)return;done=true;
+    var ok=norm(v)===norm(target);inp.disabled=true;ck.disabled=true;inp.classList.add(ok?"good":"wrong");
+    fb.className="fb "+(ok?"good":"wrong");
+    fb.textContent=ok?"Правильно!":"Правильно: "+target;
+    box.append(el("p","muted",esc(c.de)+" · "+esc(c.uk)));
+    fin([{id:c.de,label:c.de,ok:ok}]);
+  }
+  ck.onclick=check;inp.addEventListener("keydown",function(e){if(e.key==="Enter")check()});
+  if(has)setTimeout(function(){speak(target,0.9)},300);
+  try{inp.focus({preventScroll:true})}catch(e){}
+}
+function autoFork(c){
+  var mine=tokens([c.de,c.dict].concat(c.col).join(" "));
+  var cand=shuffle(CARDS.filter(function(x){return x.de!==c.de&&!(GRP[x.de]&&GRP[x.de]===GRP[c.de])}));
+  var bad=[];
+  for(var i=0;i<cand.length&&bad.length<2;i++){
+    var x=cand[i],ph=x.col[Math.floor(Math.random()*x.col.length)],tk=tokens(ph),clash=false;
+    for(var w in tk)if(mine[w])clash=true;
+    if(!clash)bad.push(ph);
+  }
+  var opts=c.col.map(function(t){return{t:t,ok:true}}).concat(bad.map(function(t){return{t:t,ok:false}}));
+  return{key:c.de,opts:shuffle(opts),why:"З «"+c.de+"» поєднуються: "+c.col.join(" · ")+". Решта належать іншим фразам.",id:c.de,label:c.de};
+}
+function manualFork(f){
+  var opts=f.ok.map(function(t){return{t:t,ok:true}}).concat(f.bad.map(function(t){return{t:t,ok:false}}));
+  return{key:f.word,opts:shuffle(opts),why:f.why,id:null,label:f.word,note:"виделка"};
+}
+function runFork(box,f,fin){
+  box.append(el("p","muted","Познач усі, що поєднуються з ключовою фразою."));
+  var wrap=el("div","fork");wrap.append(el("div","fork-key",esc(f.key)));
+  var row=el("div","fork-opts");wrap.append(row);box.append(wrap);
+  var btns=f.opts.map(function(o){
+    var b=el("button","fopt");b.textContent=o.t;b.setAttribute("aria-pressed","false");
+    b.onclick=function(){b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")==="true"?"false":"true")};
+    row.append(b);return b;
+  });
+  var ck=el("button","btn btn-r btn-sm","Перевірити");box.append(ck);
+  var fb=el("p","fb");fb.setAttribute("role","status");box.append(fb);
+  ck.onclick=function(){
+    ck.disabled=true;var ok=true;
+    btns.forEach(function(b,i){
+      var on=b.getAttribute("aria-pressed")==="true",o=f.opts[i];b.disabled=true;b.setAttribute("aria-pressed","false");
+      if(on&&o.ok)b.classList.add("good");
+      else if(on&&!o.ok){b.classList.add("wrong");ok=false}
+      else if(!on&&o.ok){b.classList.add("missed");ok=false}
+    });
+    fb.className="fb "+(ok?"good":"wrong");fb.textContent=ok?"Правильно!":"Не зовсім.";
+    box.append(el("p","muted",esc(f.why)));
+    fin([{id:f.id,label:f.label,ok:ok,note:f.note}]);
+  };
+}
+function runCat(box,items,bins,fin){
+  var res=items.map(function(c){return{id:c.de,label:c.de,ok:true}});
+  var rb={};res.forEach(function(r){rb[r.id]=r});
+  box.append(el("p","muted","Торкнись фрази, потім групи."));
+  var pool=el("div","pool"),binsEl=el("div","bins");box.append(pool,binsEl);
+  var sel=null,left=items.length;
+  shuffle(items).forEach(function(c){var ch=el("button","schip");ch.textContent=c.de;ch.dataset.id=c.de;pool.append(ch)});
+  pool.addEventListener("click",function(e){
+    var ch=e.target.closest(".schip");if(!ch)return;
+    if(sel)sel.classList.remove("sel");sel=ch;ch.classList.add("sel");
+    Array.prototype.forEach.call(binsEl.children,function(b){b.classList.add("armed")});
+  });
+  bins.forEach(function(k){
+    var b=el("div","bin",'<div class="bin-name">'+esc(KINDS[k])+'</div><div class="bin-items"></div>');
+    b.setAttribute("role","button");b.tabIndex=0;b.dataset.k=k;
+    function place(){
+      if(!sel)return;
+      var c=byDe[sel.dataset.id],kind=c.kind||"F",ok=kind===k;
+      var ch=el("span","schip "+(ok?"good":"wrong"),esc(c.de)+(ok?"":"<small>→ правильно: "+esc(KINDS[kind])+"</small>"));
+      if(!ok)rb[c.de].ok=false;
+      $(".bin-items",b).append(ch);sel.remove();sel=null;left--;
+      Array.prototype.forEach.call(binsEl.children,function(x){x.classList.remove("armed")});
+      if(left===0)fin(res);
+    }
+    b.addEventListener("click",place);
+    b.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();place()}});
+    binsEl.append(b);
+  });
+}
+function runFix(box,f,fin){
+  var misses=0,found=false,finished=false;
+  box.append(el("div","label","Крок 1 · знайди помилку"));
+  var sent=el("div","fx-sent"),btns=f.parts.map(function(t,i){var b=el("button","fx-part");b.textContent=t;b.dataset.i=i;sent.append(b);return b});
+  var step=el("div","fx-step");box.append(sent,step);
+  function finish(ok2,val){
+    finished=true;var ok=ok2&&misses<2;
+    var bb=btns[f.bad];bb.classList.remove("found","hintp");bb.classList.add("fixed");bb.textContent=f.fix[0];
+    var fb=el("p","fb "+(ok2?"good":"wrong"),ok2?"Правильно!":"Не зовсім. Правильно: "+esc(f.fix[0]));
+    fb.setAttribute("role","status");step.append(fb);
+    step.append(el("p","muted",esc(f.why)));
+    var full=f.parts.map(function(t,i){return i===f.bad?f.fix[0]:t}).join(" ");
+    var r=el("div","row");r.append(el("span","muted",esc(full)),sayBtn(full,0.9,"say"));step.append(r);
+    speak(full,0.9);
+    fin([{id:f.de,label:f.de,ok:ok}]);
+  }
+  function showStep2(){
+    step.append(el("div","label","Крок 2 · напиши правильно"));
+    step.append(el("p","muted","Замість: «"+esc(f.parts[f.bad])+"»"));
+    var inp=document.createElement("input");inp.type="text";inp.id="fixIn";inp.className="typed";
+    inp.setAttribute("autocomplete","off");inp.setAttribute("autocapitalize","none");inp.setAttribute("autocorrect","off");inp.spellcheck=false;inp.setAttribute("aria-label","Правильний варіант");
+    var ck=el("button","btn btn-r btn-sm","Перевірити");
+    step.append(inp,ck);
+    function check(){
+      if(finished)return;var v=inp.value.trim();if(!v)return;
+      var ok2=f.fix.some(function(x){return norm(x)===norm(v)});
+      inp.disabled=true;ck.disabled=true;inp.classList.add(ok2?"good":"wrong");finish(ok2,v);
+    }
+    ck.onclick=check;inp.addEventListener("keydown",function(e){if(e.key==="Enter")check()});
+    try{inp.focus({preventScroll:true})}catch(e){}
+  }
+  sent.addEventListener("click",function(e){
+    var b=e.target.closest(".fx-part");if(!b||found)return;
+    if(+b.dataset.i===f.bad){found=true;b.classList.add("found");showStep2()}
+    else{misses++;b.classList.remove("miss");void b.offsetWidth;b.classList.add("miss");if(misses>=2)btns[f.bad].classList.add("hintp")}
+  });
+}
+function runSit(box,f,fin){
+  var sb=el("div","sit-box");
+  var st=el("p","sit-text");st.textContent=f.sit;sb.append(st);
+  var uk=el("p","sit-uk");uk.textContent=f.uk;uk.hidden=true;sb.append(uk);
+  var row=el("div","row"),tr=el("button","btn btn-plain btn-sm","Показати переклад"),pl=el("button","btn btn-plain btn-sm","Прослухати");
+  tr.onclick=function(){uk.hidden=!uk.hidden;tr.textContent=uk.hidden?"Показати переклад":"Сховати переклад"};
+  pl.onclick=function(){speak(f.sit,0.9)};
+  row.append(tr,pl);sb.append(row);box.append(sb);
+  box.append(el("div","label","Що б ти сказала?"));
+  var list=el("div","opts");box.append(list);
+  var fb=el("p","fb");fb.setAttribute("role","status");box.append(fb);
+  var opts=shuffle(f.opts),done=false;
+  opts.forEach(function(o){
+    var b=el("button","opt");b.textContent=o;
+    b.onclick=function(){
+      if(done)return;done=true;var ok=o===f.ok;
+      Array.prototype.forEach.call(list.children,function(n,i){n.disabled=true;if(opts[i]===f.ok)n.classList.add("good")});
+      if(!ok)b.classList.add("wrong");
+      fb.className="fb "+(ok?"good":"wrong");fb.textContent=ok?"Правильно!":"Тут підходить: "+f.ok;
+      speak(f.ok,0.9);
+      fin([{id:f.de,label:f.de,ok:ok}]);
+    };
+    list.append(b);
+  });
+}
+
+/* ===================== ВКЛАДКИ, НАЛАШТУВАННЯ ===================== */
+function gotoTab(t){
+  S.tab=t;
+  $("#viewCards").hidden=t!=="cards";$("#viewEx").hidden=t!=="ex";
+  $("#tabCards").setAttribute("aria-selected",t==="cards"?"true":"false");
+  $("#tabEx").setAttribute("aria-selected",t==="ex"?"true":"false");
+  if(t==="ex"){renderExTabs();drawEx()}else renderCards();
+  window.scrollTo&&window.scrollTo(0,0);
+}
+function encode(){return btoa(unescape(encodeURIComponent(JSON.stringify({v:1,prog:S.prog,sess:S.sess}))))}
+function decode(s){return JSON.parse(decodeURIComponent(escape(atob(s.trim()))))}
+function msg(t){$("#codeMsg").textContent=t}
+
+function init(){
+  load();
+  $("#tabCards").onclick=function(){gotoTab("cards")};
+  $("#tabEx").onclick=function(){gotoTab("ex")};
+  $("#mode").onchange=function(e){S.mode=e.target.value;save();renderCards()};
+  $("#rand").onclick=function(){S.rand=!S.rand;S.sess[sigNow()]=null;delete S.sess[sigNow()];save();renderCards()};
+  $("#rev").onclick=function(){S.rev=!S.rev;save();renderCards()};
+  $("#srcAll").onclick=function(){S.src="all";R=null;save();renderExTabs();drawEx()};
+  $("#srcRep").onclick=function(){S.src="rep";R=null;save();renderExTabs();drawEx()};
+  $("#voice").onchange=function(e){S.voice=e.target.value;save()};
+  $("#voiceTest").onclick=function(){speak("Guten Tag! Das ist die ausgewählte Stimme.",0.9)};
+  $("#copyCode").onclick=function(){
+    var code=encode(),out=$("#codeOut");out.value=code;out.hidden=false;
+    var done=function(){msg("Код скопійовано. Встав його в поле «Відновити з коду» на іншому пристрої.")};
+    var fallback=function(){out.focus();out.select();msg("Автоматично скопіювати не вийшло. Код виділено, скопіюй його вручну.")};
+    try{navigator.clipboard.writeText(code).then(done,fallback)}catch(e){fallback()}
+  };
+  $("#restore").onclick=function(){
+    var v=$("#codeIn").value;if(!v.trim()){msg("Встав код прогресу.");return}
+    try{
+      var o=decode(v);
+      if(!o||typeof o.prog!=="object"||o.prog===null)throw new Error("bad");
+      S.prog=o.prog;S.sess=(o.sess&&typeof o.sess==="object")?o.sess:{};
+      save();$("#codeIn").value="";msg("Прогрес відновлено.");
+      renderStats();renderCards();renderExTabs();drawEx();
+    }catch(e){msg("Код не розпізнано. Перевір, що скопійовано весь код.")}
+  };
+  var rb=$("#reset"),armed=false,tm=null;
+  rb.onclick=function(){
+    if(!armed){armed=true;rb.textContent="Точно скинути? Натисни ще раз";tm=setTimeout(function(){armed=false;rb.textContent="Скинути весь прогрес"},5000);return}
+    clearTimeout(tm);armed=false;rb.textContent="Скинути весь прогрес";
+    S.prog={};S.sess={};R=null;save();msg("Прогрес скинуто.");
+    renderStats();renderCards();renderExTabs();drawEx();
+  };
+  document.addEventListener("keydown",function(e){
+    if(S.tab!=="cards")return;
+    var t=e.target;
+    if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
+    var card=$("#card");if(!card)return;
+    if(e.code==="Space"){if(t&&(t.tagName==="BUTTON"||t.tagName==="A"))return;e.preventDefault();card.classList.toggle("flipped")}
+    else if(e.key==="ArrowLeft"){e.preventDefault();rate(false)}
+    else if(e.key==="ArrowRight"){e.preventDefault();rate(true)}
+  });
+  try{if(window.speechSynthesis){speechSynthesis.onvoiceschanged=loadVoices}}catch(e){}
+  loadVoices();setTimeout(loadVoices,600);setTimeout(loadVoices,2000);
+  renderLessons();renderStats();gotoTab("cards");
+}
+init();
+})();
+</script>
+
+</body></html>
